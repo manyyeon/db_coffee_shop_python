@@ -106,6 +106,36 @@ def viewAllMenus():
         i += 1
     db.commit()
 
+# 3. 1) 전체매장조회
+def viewAllStore():
+    cursor.execute('SELECT * FROM 매장;')
+    storeInfoList = cursor.fetchall()
+    i = 0
+    while(i<len(storeInfoList)):
+        printAllInfoInData(storeInfoList[i])
+        i += 1
+    db.commit()
+
+# 4. 1) 전체방문기록조회
+def viewAllVisit():
+    cursor.execute('SELECT * FROM 방문;')
+    visitInfoList = cursor.fetchall()
+    i = 0
+    while(i<len(visitInfoList)):
+        printAllInfoInData(visitInfoList[i])
+        i += 1
+    db.commit()
+
+#5. 1) 본사정보조회
+def viewAllCompany():
+    cursor.execute('SELECT * FROM 본사;')
+    companyInfoList = cursor.fetchall()
+    i = 0
+    while(i<len(companyInfoList)):
+        printAllInfoInData(companyInfoList[i])
+        i += 1
+    db.commit()
+
 """
 --- 전체 기능 ---
 1. 회원
@@ -165,6 +195,7 @@ while(True):
             else:
                 print("홈으로 가기")
                 break
+    # 2. 메뉴
     elif(select == 2):
         while(True):
             subSelect = getSubOptionFromUser(select)
@@ -174,20 +205,37 @@ while(True):
                 viewAllMenus()
             # 2) 메뉴검색
             # 3) 메뉴추가
+    # 3. 매장
     elif(select == 3):
+        subSelect = getSubOptionFromUser(select)
+        printTopBar(subOptions[select-1][subSelect-1])
         # 1) 전체매장조회
-        # if(subSelect == 1):
-
-        # 2) 매장검색
-        # 3) 매장추가
-        print("\n**************** 매장 ****************")
+        if(subSelect == 1):
+            viewAllStore()
+    # 4. 회원 방문 관리
     elif(select == 4):
-        print("\n************ 회원 방문 관리 ************")
+        while(True):
+            subSelect = getSubOptionFromUser(select)
+            printTopBar(subOptions[select-1][subSelect-1])
+            # 1) 전체방문기록조회
+            if(subSelect == 1):
+                viewAllVisit()
+            # 2) 매장별 방문기록조회
+            # 3) 방문기록추가
+            # 4) 홈으로
+    # 5. 본사정보
     elif(select == 5):
-        print("\n************** 본사 정보 **************")
+        while(True):
+            subSelect = getSubOptionFromUser(select)
+            printTopBar(subOptions[select-1][subSelect-1])
+            # 1) 본사정보조회
+            if(subSelect == 1):
+                viewAllCompany()
+            # 2) 본사정보수정
+            # 3) 홈으로
     elif(select == 6):
         print("\n************** 본사 정보 **************")
-    elif(select == 7):
+    elif(select == 9):
         print("----------------종료합니다----------------")
         break
 
