@@ -55,7 +55,10 @@ def printTopBar(optionName):
 def printAllInfoInData(info):
     print(bar)
     for key in info:
-        print(key, "\t:", info.get(key))
+        if(len(key) < 4):
+            print(key, "\t\t:", info.get(key))
+        else:
+            print(key, "\t:", info.get(key))
     print(bar)
 
 # 릴레이션 모두 출력
@@ -233,6 +236,21 @@ def addNewMenu():
     print()
     db.commit()
 
+# 4. 1) 본사별주문조회
+def viewOrderByCompany():
+    companyNameInput = input('검색할 메뉴들의 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    cursor.execute('select 지점명, 메뉴이름, 가격, 주문수량, 주문일자, 카테고리 from 주문, 매장, 메뉴 where 주문.매장번호 = 매장.매장번호 and 주문.메뉴번호 = 메뉴.메뉴번호 and 매장.본사=%s;', companyNameInput)
+    orderInfoList = cursor.fetchall()
+    print()
+    printTopBar(companyNameInput + "의 주문목록")
+    i = 0
+    while(i<len(orderInfoList)):
+        printAllInfoInData(orderInfoList[i])
+        i += 1
+    db.commit()
+
 """
 --- 전체 기능 ---
 1. 본사
@@ -311,13 +329,15 @@ while(True):
         while(True):
             subSelect = getSubOptionFromUser(select)
             printTopBar(subOptions[select-1][subSelect-1])
-            # 1) 전체방문기록조회
+            # 1) 본사별주문조회
             if(subSelect == 1):
-                viewAllVisit()
-            # 2) 매장별 방문기록조회
-            # 3) 방문기록추가
-            # 4) 홈으로
-    elif(select == 10):
+                getCompanyNames()
+                viewOrderByCompany()
+            # 2) 주문등록
+            else:
+                print("홈으로 가기")
+                break;
+    elif(select == 5):
         print("----------------종료합니다----------------")
         break
 
