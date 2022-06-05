@@ -8,7 +8,7 @@ cursor = db.cursor(pymysql.cursors.DictCursor)
 cursor.execute('USE s2020112547_final_project;')
 
 options = ["본사", "매장", "메뉴", "주문", "시스템종료"]
-subOptions = [["전체본사조회", "이름으로본사검색", "본사등록", "홈으로"], ["본사별매장조회", "매장등록", "홈으로"], ["본사별메뉴조회", "메뉴등록", "홈으로"], ["본사별주문조회", "주문등록", "홈으로"]]
+subOptions = [["전체본사조회", "이름으로본사검색", "본사등록", "홈으로"], ["본사매장조회", "매장등록", "홈으로"], ["본사메뉴조회", "메뉴등록", "홈으로"], ["본사주문조회", "본사별 총 주문수량 조회", "홈으로"]]
 bar = "--------------------------------------"
 
 # 기능 출력
@@ -121,7 +121,7 @@ def addNewCompany():
     print()
     db.commit()
 
-# 2. 1) 본사별매장조회
+# 2. 1) 본사매장조회
 def viewStoreByCompany():
     companyNameInput = input('검색할 매장들의 본사 이름 입력 >> ')
     # 공백 제거
@@ -179,7 +179,7 @@ def addNewStore():
 #         i += 1
 #     db.commit()
 
-# 3. 1) 본사별메뉴조회
+# 3. 1) 본사메뉴조회
 category = {1: "COFFEE", 2: "FRAPPUCCINO", 3: "TEA", 4: "CAKE"}
 def viewMenuByCompany():
     companyNameInput = input('검색할 메뉴들의 본사 이름 입력 >> ')
@@ -236,9 +236,9 @@ def addNewMenu():
     print()
     db.commit()
 
-# 4. 1) 본사별주문조회
+# 4. 1) 본사주문조회
 def viewOrderByCompany():
-    companyNameInput = input('검색할 메뉴들의 본사 이름 입력 >> ')
+    companyNameInput = input('검색할 주문내역들의 본사 이름 입력 >> ')
     # 공백 제거
     companyNameInput = companyNameInput.replace(" ", "")
     cursor.execute('select 지점명, 메뉴이름, 가격, 주문수량, 주문일자, 카테고리 from 주문, 매장, 메뉴 where 주문.매장번호 = 매장.매장번호 and 주문.메뉴번호 = 메뉴.메뉴번호 and 매장.본사=%s;', companyNameInput)
@@ -248,6 +248,17 @@ def viewOrderByCompany():
     i = 0
     while(i<len(orderInfoList)):
         printAllInfoInData(orderInfoList[i])
+        i += 1
+    db.commit()
+
+# 4. 2) 본사별 총 주문수량 조회
+def viewSumOrderNumByCompany():
+    cursor.execute('select 매장.본사, sum(주문수량) as "총 주문수량" from 주문, 매장, 메뉴 where 주문.매장번호 = 매장.매장번호 and 주문.메뉴번호 = 메뉴.메뉴번호 group by 매장.본사;')
+    sumOrderNumByCompnayList = cursor.fetchall()
+    print()
+    i = 0
+    while(i<len(sumOrderNumByCompnayList)):
+        printAllInfoInData(sumOrderNumByCompnayList[i])
         i += 1
     db.commit()
 
@@ -265,7 +276,7 @@ def viewOrderByCompany():
     2) 메뉴등록
 4. 주문
     1) 본사별주문조회
-    2) 주문등록
+    2) 본사별 총 주문수량 조회
 5. 시스템종료
 """
 
@@ -334,6 +345,8 @@ while(True):
                 getCompanyNames()
                 viewOrderByCompany()
             # 2) 주문등록
+            elif(subSelect == 2):
+                viewSumOrderNumByCompany()
             else:
                 print("홈으로 가기")
                 break;
