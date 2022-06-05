@@ -157,7 +157,6 @@ def addNewStore():
     storeInfoInput.append(input('영업시간 입력 >> '))
     storeInfoInput.append(input('전화번호 입력 >> '))
     inputQuery = "INSERT INTO 매장 VALUES(" + str(lastNum+1) + ", '%s', '%s', '%s', '%s', '%s');" %(storeInfoInput[0], storeInfoInput[1], storeInfoInput[2], storeInfoInput[3], storeInfoInput[4])
-    print(inputQuery)
     cursor.execute(inputQuery)
     db.commit()
 
@@ -168,16 +167,6 @@ def addNewStore():
     printAllInfoInData(storeInfo[0])
     print()
     db.commit()
-
-# # 3. 1) 전체메뉴조회
-# def viewAllMenus():
-#     cursor.execute('SELECT * FROM 메뉴;')
-#     menuInfoList = cursor.fetchall()
-#     i = 0
-#     while(i<len(menuInfoList)):
-#         printAllInfoInData(menuInfoList[i])
-#         i += 1
-#     db.commit()
 
 # 3. 1) 본사메뉴조회
 category = {1: "COFFEE", 2: "FRAPPUCCINO", 3: "TEA", 4: "CAKE"}
@@ -224,7 +213,6 @@ def addNewMenu():
     categoryName = category.get(categoryNum)
     menuInfoInput.append(categoryName)
     inputQuery = "INSERT INTO 메뉴 VALUES(" + str(lastNum+1) + ", '%s', '%s', '%s', '%s');" %(menuInfoInput[0], menuInfoInput[1], menuInfoInput[2], menuInfoInput[3])
-    print(inputQuery)
     cursor.execute(inputQuery)
     db.commit()
 
@@ -269,13 +257,13 @@ def viewSumOrderNumByCompany():
     2) 이름으로본사검색
     3) 본사등록
 2. 매장
-    1) 본사별매장조회
+    1) 본사매장조회
     2) 매장등록
 3. 메뉴
-    1) 본사별메뉴조회
+    1) 본사메뉴조회
     2) 메뉴등록
 4. 주문
-    1) 본사별주문조회
+    1) 본사주문조회
     2) 본사별 총 주문수량 조회
 5. 시스템종료
 """
