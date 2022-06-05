@@ -114,38 +114,25 @@ def addNewCompany():
     db.commit()
 
 # 2. 1) 본사별매장조회
+def viewStoreByCompany():
+    companyNameInput = input('검색할 매장들의 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    cursor.execute('SELECT 매장번호, 지점명, 위치, 영업시간, 전화번호 FROM 매장 WHERE 본사 = %s;', companyNameInput)
+    storeInfoList = cursor.fetchall()
+    print()
+    printTopBar(companyNameInput + "의 매장들")
+    i = 0
+    while(i<len(storeInfoList)):
+        printAllInfoInData(storeInfoList[i])
+        i += 1
+    db.commit()
+    
 
 # 2. 2) 매장등록
 def addNewStore():
     storeInfoInput = []
-    storeInfoInput.appen(input(''))
-
-def searchUserById():
-    userIdInput = input('검색할 회원 아이디 입력 >> ')
-    cursor.execute('SELECT * FROM 회원 WHERE 회원아이디 = %s', userIdInput)
-            
-    userInfo = cursor.fetchall()
-    printAllInfoInData(userInfo[0])
-    print()
-    db.commit()
-
-# 1. 3) 회원등록
-def addNewUser():
-    userInfoInput = []
-    userInfoInput.append(input('아이디(중복안됨) >> '))
-    userInfoInput.append(input('이름 >> '))
-    userInfoInput.append(input('전화번호 >> '))
-
-    userInfoInput = tuple(userInfoInput)
-
-    cursor.execute('INSERT INTO 회원 VALUES(%s, %s, %s)', userInfoInput)
-    cursor.execute('SELECT * FROM 회원 WHERE 회원아이디 = %s', userInfoInput[0])
-
-    userInfo = cursor.fetchall()
-    print("\n회원이 등록되었습니다.")
-    printAllInfoInData(userInfo[0])
-    print()
-    db.commit()
+    storeInfoInput.append(input(''))
 
 # 2. 1) 전체메뉴조회
 category = {1: "COFFEE", 2: "FRAPPUCCINO", 3: "TEA", 4: "CAKE"}
@@ -157,28 +144,6 @@ def viewAllMenus():
         printAllInfoInData(menuInfoList[i])
         i += 1
     db.commit()
-
-# 3. 1) 전체매장조회
-def viewAllStore():
-    cursor.execute('SELECT * FROM 매장;')
-    storeInfoList = cursor.fetchall()
-    i = 0
-    while(i<len(storeInfoList)):
-        printAllInfoInData(storeInfoList[i])
-        i += 1
-    db.commit()
-
-# 4. 1) 전체방문기록조회
-def viewAllVisit():
-    cursor.execute('SELECT * FROM 방문;')
-    visitInfoList = cursor.fetchall()
-    i = 0
-    while(i<len(visitInfoList)):
-        printAllInfoInData(visitInfoList[i])
-        i += 1
-    db.commit()
-
-
 
 """
 --- 전체 기능 ---
@@ -227,11 +192,13 @@ while(True):
         while(True):
             subSelect = getSubOptionFromUser(select)
             printTopBar(subOptions[select-1][subSelect-1])
-            # 1) 전체메뉴조회
+            # 1) 본사별매장조회
             if(subSelect == 1):
-                viewAllMenus()
-            # 2) 메뉴검색
-            # 3) 메뉴추가
+                getCompanyNames()
+                viewStoreByCompany()
+            # 2) 매장등록
+            elif(subSelect == 2):
+                getCompanyNames()
     # 3. 메뉴
     elif(select == 3):
         subSelect = getSubOptionFromUser(select)
@@ -250,26 +217,6 @@ while(True):
             # 2) 매장별 방문기록조회
             # 3) 방문기록추가
             # 4) 홈으로
-    # 5. 본사정보
-    elif(select == 5):
-        while(True):
-            subSelect = getSubOptionFromUser(select)
-            printTopBar(subOptions[select-1][subSelect-1])
-            # 1) 본사정보조회
-            if(subSelect == 1):
-                viewAllCompany()
-            # 2) 본사정보수정
-            # 3) 홈으로
-    # 6. 재료정보
-    elif(select == 6):
-        while(True):
-            subSelect = getSubOptionFromUser(select)
-            printTopBar(subOptions[select-1][subSelect-1])
-            # 1) 전체재료조회
-            if(subSelect == 1):
-                print()
-            # 2) 재료검색
-            # 3) 재료추가
     elif(select == 7):
         print("\n************** 본사 정보 **************")
     elif(select == 8):
