@@ -1,3 +1,4 @@
+from nis import cat
 import pymysql
 
 db = pymysql.connect(host="localhost", user="s2020112547", password="", charset="utf8")
@@ -82,7 +83,6 @@ def getCompanyNames():
     print(bar)
 
   
-
 #1. 1) 전체본사조회
 
 # 1. 2) 이름으로본사검색
@@ -166,15 +166,71 @@ def addNewStore():
     print()
     db.commit()
 
-# 2. 1) 전체메뉴조회
+# # 3. 1) 전체메뉴조회
+# def viewAllMenus():
+#     cursor.execute('SELECT * FROM 메뉴;')
+#     menuInfoList = cursor.fetchall()
+#     i = 0
+#     while(i<len(menuInfoList)):
+#         printAllInfoInData(menuInfoList[i])
+#         i += 1
+#     db.commit()
+
+# 3. 1) 본사별메뉴조회
 category = {1: "COFFEE", 2: "FRAPPUCCINO", 3: "TEA", 4: "CAKE"}
-def viewAllMenus():
-    cursor.execute('SELECT * FROM 메뉴;')
+def viewMenuByCompany():
+    companyNameInput = input('검색할 메뉴들의 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    cursor.execute('SELECT 메뉴번호, 메뉴이름, 가격 FROM 메뉴 WHERE 본사 = %s;', companyNameInput)
     menuInfoList = cursor.fetchall()
+    print()
+    printTopBar(companyNameInput + "의 메뉴들")
     i = 0
     while(i<len(menuInfoList)):
         printAllInfoInData(menuInfoList[i])
         i += 1
+    db.commit()
+
+# 카테고리 출력
+def printCategoryList():
+    print(bar)
+    for key in category:
+        print(str(key) + "." + category[key], end=" ")
+    print()
+    print(bar)
+
+# 3. 2) 메뉴등록
+def addNewMenu():
+    cursor.execute('SELECT MAX(메뉴번호) AS 마지막번호 FROM 메뉴;')
+    lastNum = cursor.fetchall()
+    lastNum = lastNum[0].get('마지막번호')
+    db.commit()
+    
+    getCompanyNames()
+    companyNameInput = input('등록할 메뉴의 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    
+    menuInfoInput = []
+    menuInfoInput.append(companyNameInput)
+    menuInfoInput.append(input('메뉴이름 입력 >> '))
+    menuInfoInput.append(input('가격 입력 >> '))
+    printCategoryList()
+    categoryNum = int(input('카테고리 번호 입력 >> '))
+    categoryName = category.get(categoryNum)
+    menuInfoInput.append(categoryName)
+    inputQuery = "INSERT INTO 메뉴 VALUES(" + str(lastNum+1) + ", '%s', '%s', '%s', '%s');" %(menuInfoInput[0], menuInfoInput[1], menuInfoInput[2], menuInfoInput[3])
+    print(inputQuery)
+    cursor.execute(inputQuery)
+    db.commit()
+
+    cursor.execute('SELECT * FROM 메뉴 WHERE 메뉴번호=' + str(lastNum+1) + ';')
+    menuInfo = cursor.fetchall()
+
+    print("\n메뉴가 새롭게 등록되었습니다.")
+    printAllInfoInData(menuInfo[0])
+    print()
     db.commit()
 
 """
@@ -232,13 +288,24 @@ while(True):
             elif(subSelect == 2):
                 viewAll("매장")
                 addNewStore()
+            else:
+                print("홈으로 가기")
+                break
     # 3. 메뉴
     elif(select == 3):
-        subSelect = getSubOptionFromUser(select)
-        printTopBar(subOptions[select-1][subSelect-1])
-        # 1) 전체매장조회
-        if(subSelect == 1):
-            viewAllStore()
+        while(True):
+            subSelect = getSubOptionFromUser(select)
+            printTopBar(subOptions[select-1][subSelect-1])
+            # 1) 본사별메뉴조회
+            if(subSelect == 1):
+                getCompanyNames()
+                viewMenuByCompany()
+            # 2) 메뉴등록
+            elif(subSelect == 2):
+                addNewMenu()
+            else:
+                print("홈으로 가기")
+                break
     # 4. 주문
     elif(select == 4):
         while(True):
@@ -250,12 +317,6 @@ while(True):
             # 2) 매장별 방문기록조회
             # 3) 방문기록추가
             # 4) 홈으로
-    elif(select == 7):
-        print("\n************** 본사 정보 **************")
-    elif(select == 8):
-        print("\n************** 본사 정보 **************")
-    elif(select == 9):
-        print("\n************** 본사 정보 **************")
     elif(select == 10):
         print("----------------종료합니다----------------")
         break
