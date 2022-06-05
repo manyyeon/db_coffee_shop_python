@@ -6,8 +6,8 @@ cursor = db.cursor(pymysql.cursors.DictCursor)
 
 cursor.execute('USE s2020112547_final_project;')
 
-options = ["회원", "메뉴", "매장", "회원방문관리", "본사정보", "재료재고정보", "재료공급내역", "재료사용기록", "시스템종료"]
-subOptions = [["전체회원조회", "아이디로회원검색", "회원등록", "홈으로"], ["전체메뉴조회", "메뉴검색", "메뉴추가", "홈으로"], ["전체매장조회", "매장검색", "매장추가", "홈으로"], ["전체방문기록조회", "매장별 방문기록조회", "방문기록추가", "홈으로"], ["본사정보조회", "본사정보수정", "홈으로"], ["전체재료조회", "재료검색", "재료추가", "홈으로"], ["전체재고조회", "매장별재고검색"], ["전체공급내역조회", "공급내역검색", "공급내역등록", "홈으로"], ["전체재료사용내역조회", "사용내역검색", "사용내역등록", "홈으로"]]
+options = ["본사", "매장", "메뉴", "주문", "시스템종료"]
+subOptions = [["전체본사조회", "이름으로본사검색", "본사등록", "홈으로"], ["본사별매장조회", "매장등록", "홈으로"], ["본사별메뉴조회", "메뉴등록", "홈으로"], ["본사별주문조회", "주문등록", "홈으로"]]
 bar = "--------------------------------------"
 
 # 기능 출력
@@ -51,23 +51,75 @@ def printTopBar(optionName):
     print()
 
 # 데이터의 모든 정보 출력해줌
-def printAllInfoInData(userInfo):
+def printAllInfoInData(info):
     print(bar)
-    for key in userInfo:
-        print(key, "\t:", userInfo.get(key))
+    for key in info:
+        print(key, "\t:", info.get(key))
     print(bar)
 
-# 1. 1) 전체회원조회
-def viewAllUsers():
-    cursor.execute('SELECT * FROM 회원;')
-    userInfoList = cursor.fetchall()
+# 본사 이름들만 전체 출력해줌
+def getCompanyNames():
+    print(bar)
+    cursor.execute('SELECT 본사이름 FROM 본사;')
+    companyNameList = cursor.fetchall()
     i = 0
-    while(i<len(userInfoList)):
-        printAllInfoInData(userInfoList[i])
+    while(i<len(companyNameList)):
+        print(i+1, end="")
+        print(". " + companyNameList[i].get('본사이름'), end=" ")
+        i += 1
+    print()
+    print(bar)
+
+#1. 1) 전체본사조회
+def viewAllCompany():
+    cursor.execute('SELECT * FROM 본사;')
+    companyInfoList = cursor.fetchall()
+    i = 0
+    while(i<len(companyInfoList)):
+        printAllInfoInData(companyInfoList[i])
         i += 1
     db.commit()
 
-# 1. 2) 아이디로회원검색
+# 1. 2) 이름으로본사검색
+def searchCompanyByName():
+    companyNameInput = input('검색할 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    
+    cursor.execute('SELECT * FROM 본사 WHERE 본사이름 = %s', companyNameInput)
+            
+    companyInfo = cursor.fetchall()
+    print()
+    printTopBar("검색결과")
+    printAllInfoInData(companyInfo[0])
+    print()
+    db.commit()
+
+# 1. 3) 본사등록
+def addNewCompany():
+    companyInfoInput = []
+    companyInfoInput.append(input('본사이름 입력 >> '))
+    companyInfoInput.append(input('위치 입력 >> '))
+    companyInfoInput.append(input('전화번호 입력 >> '))
+
+    companyInfoInput = tuple(companyInfoInput)
+
+    cursor.execute('INSERT INTO 본사 VALUES(%s, %s, %s)', companyInfoInput)
+    cursor.execute('SELECT * FROM 본사 WHERE 본사이름 = %s', companyInfoInput[0])
+
+    companyInfoInput = cursor.fetchall()
+    print("\n본사가 새롭게 등록되었습니다.")
+    printAllInfoInData(companyInfoInput[0])
+    print()
+    db.commit()
+
+# 2. 1) 본사별매장조회
+
+# 2. 2) 매장등록
+def addNewStore():
+    storeInfoInput = []
+    storeInfoInput.appen(input(''))
+
 def searchUserById():
     userIdInput = input('검색할 회원 아이디 입력 >> ')
     cursor.execute('SELECT * FROM 회원 WHERE 회원아이디 = %s', userIdInput)
@@ -126,79 +178,51 @@ def viewAllVisit():
         i += 1
     db.commit()
 
-#5. 1) 본사정보조회
-def viewAllCompany():
-    cursor.execute('SELECT * FROM 본사;')
-    companyInfoList = cursor.fetchall()
-    i = 0
-    while(i<len(companyInfoList)):
-        printAllInfoInData(companyInfoList[i])
-        i += 1
-    db.commit()
+
 
 """
 --- 전체 기능 ---
-1. 회원
-    1) 전체회원조회
-    2) 아이디로회원검색
-    3) 회원등록
-2. 메뉴
-    1) 전체메뉴조회
-    2) 메뉴검색
-    3) 메뉴추가
-3. 매장
-    1) 전체매장조회
-    2) 매장검색
-    3) 매장추가
-4. 회원방문관리
-    1) 전체방문기록조회
-    2) 매장별 방문기록조회
-    3) 방문기록추가
-5. 본사정보
-    1) 본사정보조회
-    2) 본사정보수정
-6. 재료정보
-    1) 전체재료조회
-    2) 재료검색
-    3) 재료추가
-7. 재료재고정보
-    1) 전체재고조회
-    2) 매장별재고검색
-8. 재료공급내역
-    1) 전체공급내역조회
-    2) 공급내역검색
-    3) 공급내역기록
-9. 재료사용기록
-    1) 전체재료사용내역조회
-    2) 사용내역검색
-    3) 사용내역등록
-10. 시스템종료
+1. 본사
+    1) 전체본사조회
+    2) 이름으로본사검색
+    3) 본사등록
+2. 매장
+    1) 본사별매장조회
+    2) 매장등록
+3. 메뉴
+    1) 본사별메뉴조회
+    2) 메뉴등록
+4. 주문
+    1) 본사별주문조회
+    2) 주문등록
+5. 시스템종료
 """
 
-print("------- 스타벅스에 운영 시스템 -------")
+print("-------- 커피숍 운영 시스템 --------")
 while(True):
     # 기능 계속 출력(종료 선택할 때까지)
     select = getOptionFromUser()
     printTopBar(options[select-1])
         
-    # 1. 회원
+    # 1. 본사
     if(select == 1):
          while(True):
             subSelect = getSubOptionFromUser(select)
             printTopBar(subOptions[select-1][subSelect-1])
             # 1) 전체회원조회
             if(subSelect == 1):
-                viewAllUsers()
-            # 2) 아이디로회원검색
+                viewAllCompany()
+            # 2) 이름으로본사검색
             elif(subSelect == 2):
-                searchUserById()
-            # 3) 회원등록
+                getCompanyNames()
+                searchCompanyByName()
+            # 3) 본사등록
             elif(subSelect == 3):
-                addNewUser()
+                addNewCompany()
             else:
                 print("홈으로 가기")
                 break
-    # 2. 메뉴
+    # 2. 매장
     elif(select == 2):
         while(True):
             subSelect = getSubOptionFromUser(select)
@@ -208,14 +232,14 @@ while(True):
                 viewAllMenus()
             # 2) 메뉴검색
             # 3) 메뉴추가
-    # 3. 매장
+    # 3. 메뉴
     elif(select == 3):
         subSelect = getSubOptionFromUser(select)
         printTopBar(subOptions[select-1][subSelect-1])
         # 1) 전체매장조회
         if(subSelect == 1):
             viewAllStore()
-    # 4. 회원 방문 관리
+    # 4. 주문
     elif(select == 4):
         while(True):
             subSelect = getSubOptionFromUser(select)
