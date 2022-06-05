@@ -57,6 +57,17 @@ def printAllInfoInData(info):
         print(key, "\t:", info.get(key))
     print(bar)
 
+# 릴레이션 모두 출력
+def viewAll(relationName):
+    query = 'SELECT * FROM ' + relationName
+    cursor.execute(query)
+    infoList = cursor.fetchall()
+    i = 0
+    while(i<len(infoList)):
+        printAllInfoInData(infoList[i])
+        i += 1
+    db.commit()
+
 # 본사 이름들만 전체 출력해줌
 def getCompanyNames():
     print(bar)
@@ -70,15 +81,9 @@ def getCompanyNames():
     print()
     print(bar)
 
+  
+
 #1. 1) 전체본사조회
-def viewAllCompany():
-    cursor.execute('SELECT * FROM 본사;')
-    companyInfoList = cursor.fetchall()
-    i = 0
-    while(i<len(companyInfoList)):
-        printAllInfoInData(companyInfoList[i])
-        i += 1
-    db.commit()
 
 # 1. 2) 이름으로본사검색
 def searchCompanyByName():
@@ -131,8 +136,35 @@ def viewStoreByCompany():
 
 # 2. 2) 매장등록
 def addNewStore():
+    print()
+    cursor.execute('SELECT MAX(매장번호) AS 마지막번호 FROM 매장;')
+    lastNum = cursor.fetchall()
+    lastNum = lastNum[0].get('마지막번호')
+    db.commit()
+    
+    getCompanyNames()
+    companyNameInput = input('등록할 매장의 본사 이름 입력 >> ')
+    # 공백 제거
+    companyNameInput = companyNameInput.replace(" ", "")
+    
     storeInfoInput = []
-    storeInfoInput.append(input(''))
+    storeInfoInput.append(companyNameInput)
+    storeInfoInput.append(input('지점명 입력 >> '))
+    storeInfoInput.append(input('위치 입력 >> '))
+    storeInfoInput.append(input('영업시간 입력 >> '))
+    storeInfoInput.append(input('전화번호 입력 >> '))
+    inputQuery = "INSERT INTO 매장 VALUES(" + str(lastNum+1) + ", '%s', '%s', '%s', '%s', '%s');" %(storeInfoInput[0], storeInfoInput[1], storeInfoInput[2], storeInfoInput[3], storeInfoInput[4])
+    print(inputQuery)
+    cursor.execute(inputQuery)
+    db.commit()
+
+    cursor.execute('SELECT * FROM 매장 WHERE 매장번호=' + str(lastNum+1) + ';')
+    storeInfo = cursor.fetchall()
+
+    print("\n매장이 새롭게 등록되었습니다.")
+    printAllInfoInData(storeInfo[0])
+    print()
+    db.commit()
 
 # 2. 1) 전체메뉴조회
 category = {1: "COFFEE", 2: "FRAPPUCCINO", 3: "TEA", 4: "CAKE"}
@@ -176,7 +208,7 @@ while(True):
             printTopBar(subOptions[select-1][subSelect-1])
             # 1) 전체회원조회
             if(subSelect == 1):
-                viewAllCompany()
+                viewAll("본사")
             # 2) 이름으로본사검색
             elif(subSelect == 2):
                 getCompanyNames()
@@ -198,7 +230,8 @@ while(True):
                 viewStoreByCompany()
             # 2) 매장등록
             elif(subSelect == 2):
-                getCompanyNames()
+                viewAll("매장")
+                addNewStore()
     # 3. 메뉴
     elif(select == 3):
         subSelect = getSubOptionFromUser(select)
